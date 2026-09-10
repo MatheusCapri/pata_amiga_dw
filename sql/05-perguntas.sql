@@ -17,7 +17,16 @@ USE dw_pata_amiga;
 --  de loja. AVG ignora NULL - por isso a etapa nao cumprida foi gravada como NULL.
 --  dias_total_ate_entrega e o processo inteiro, nao um dos quatro intervalos.
 
--- >>> ESCREVA AQUI a consulta da P1
+SELECT
+    dl.porte,
+    ROUND(AVG(f.dias_integracao_separacao), 1) AS media_integracao_separacao,
+    ROUND(AVG(f.dias_separacao_nota), 1)       AS media_separacao_nota,
+    ROUND(AVG(f.dias_nota_despacho), 1)        AS media_nota_despacho,
+    ROUND(AVG(f.dias_despacho_entrega), 1)     AS media_despacho_entrega,
+    ROUND(AVG(f.dias_total_ate_entrega), 1)    AS media_total_ate_entrega
+FROM fato_pedido f
+LEFT JOIN dim_loja dl ON dl.sk_loja = f.sk_loja
+GROUP BY dl.porte;
 
 
 -- =====================================================================================
@@ -27,7 +36,16 @@ USE dw_pata_amiga;
 --  PADRONIZADO (nunca pela grafia crua). O percentual do total usa uma
 --  subconsulta com o faturamento da rede como denominador.
 
--- >>> ESCREVA AQUI a consulta da P2
+SELECT
+    dc.nome_categoria,
+    ROUND(SUM(f.vl_liquido)) AS faturamento,
+    ROUND(
+        100 * SUM(f.vl_liquido) / (SELECT SUM(vl_liquido) FROM fato_pedido), 1
+    ) AS pct_do_total
+FROM fato_pedido f
+JOIN dim_categoria dc ON dc.sk_categoria = f.sk_categoria
+GROUP BY dc.nome_categoria
+ORDER BY faturamento DESC;
 
 
 -- =====================================================================================
@@ -38,7 +56,12 @@ USE dw_pata_amiga;
 --  Confira se o WhatsApp aparece - se nao, o CASE do arquivo 04 testou APP antes
 --  de WHATS.
 
--- >>> ESCREVA AQUI a consulta da P3
+SELECT
+    canal_pedido,
+    ROUND(AVG(CASE WHEN houve_desconto = 'Sim' THEN vl_liquido END), 2) AS ticket_com_desconto,
+    ROUND(AVG(CASE WHEN houve_desconto = 'Nao' THEN vl_liquido END), 2) AS ticket_sem_desconto
+FROM fato_pedido
+GROUP BY canal_pedido;
 
 
 -- =====================================================================================
@@ -50,7 +73,7 @@ USE dw_pata_amiga;
 --  praca - isso esta certo. Multiplique por b.fator_publico para o faturamento
 --  nao ser contado duas vezes.
 
--- >>> ESCREVA AQUI a consulta da P4
+
 
 
 -- =====================================================================================
