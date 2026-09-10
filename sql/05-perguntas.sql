@@ -73,8 +73,15 @@ GROUP BY canal_pedido;
 --  praca - isso esta certo. Multiplique por b.fator_publico para o faturamento
 --  nao ser contado duas vezes.
 
-
-
+SELECT
+    dp.nome_praca,
+    ROUND(SUM(f.vl_liquido * b.fator_publico)) AS faturamento_rateado
+FROM fato_pedido f
+JOIN dim_loja l ON l.sk_loja = f.sk_loja
+JOIN bridge_loja_praca b ON b.cod_loja = l.cod_loja
+JOIN dim_praca dp ON dp.sk_praca = b.sk_praca
+GROUP BY dp.nome_praca
+ORDER BY faturamento_rateado DESC;
 
 -- =====================================================================================
 --  P5 - ONDE ABRIR A PROXIMA LOJA, E O QUE OS DADOS NAO PERMITEM AFIRMAR?
@@ -82,10 +89,39 @@ GROUP BY canal_pedido;
 --  (a) Ranqueie as lojas por itens POR MIL HABITANTES (numerador na fato,
 --      denominador na dimensao), calculado AQUI na consulta - nunca gravado
 --      pronto. Cruze com o tempo medio de entrega.
+
+SELECT
+    dl.nome_loja,
+    dl.populacao_cidade,
+    SUM(f.qt_itens) AS itens_vendidos,
+    ROUND(SUM(f.qt_itens) / dl.populacao_cidade * 1000, 2) AS itens_por_mil_habitantes,
+    ROUND(AVG(f.dias_total_ate_entrega), 1) AS media_dias_entrega
+FROM fato_pedido f
+JOIN dim_loja dl ON dl.sk_loja = f.sk_loja
+GROUP BY dl.nome_loja, dl.populacao_cidade
+ORDER BY itens_por_mil_habitantes DESC
+LIMIT 10;
+
 --  (b) Mostre o faturamento por faixa de franquia e explique por que ele NAO
 --      responde "quanto veio de lojas que JA ERAM Ouro na data do pedido": o
 --      cadastro so tem a foto de hoje.
+
+SELECT
+    dl.faixa_franquia,
+    ROUND(SUM(f.vl_liquido)) AS faturamento
+FROM fato_pedido f
+JOIN dim_loja dl ON dl.sk_loja = f.sk_loja
+GROUP BY dl.faixa_franquia
+ORDER BY faturamento DESC;
+
 --  (c) Meca o que ficou de fora: pedidos sem loja, entregas nao concluidas,
 --      itens e valores em branco.
 
--- >>> ESCREVA AQUI as consultas da P5
+SELECT 'pedidos sem loja identificada' AS o_que_ficou_de_fora, COUNT(*) AS quantidade
+FROM fato_pedido WHERE sk_loja = -1
+UNION ALL SELECT 'entregas ainda nao concluidas', COUNT(*)
+FROM fato_pedido WHERE sk_tempo_entrega = -1
+UNION ALL SELECT 'pedidos com quantidade de itens em branco', COUNT(*)
+FROM fato_pedido WHERE qt_itens IS NULL
+UNION ALL SELECT 'pedidos com valor liquido em branco', COUNT(*)
+FROM fato_pedido WHERE vl_liquido IS NULL;
