@@ -178,7 +178,7 @@ Com base nos dados, **Gaspar** (ou praças com perfil semelhante — alta demand
 
 ## Vídeo
 
-[Link do vídeo no Google Drive]( ).
+[Link do vídeo no Google Drive](https://drive.google.com/file/d/11yA7V28Fursh-Zf76sGjEw0IwJg6_t83/view?usp=sharing).
 
 ## Fonte dos Dados
 
@@ -187,4 +187,4 @@ Dados fictícios elaborados para fins didáticos, fornecidos no Mini-Projeto Ava
 ## Autor
 
 **Matheus Capri**
-[LinkedIn](www.linkedin.com/in/matheus-capri-nery) · [GitHub](https://github.com/MatheusCapri)
+[LinkedIn](https://www.linkedin.com/in/matheus-capri-nery) · [GitHub](https://github.com/MatheusCapri)
